@@ -1,11 +1,15 @@
-ARG BUILD_FROM
-FROM ${BUILD_FROM}
+ARG ARCH=amd64
+ARG OS=alpine
 
-# Build arguments
+FROM ${ARCH}/python:${OS}
+
+# Basic build-time metadata as defined at http://label-schema.org
 ARG BUILD_DATE
 ARG BUILD_VERSION
 ARG BUILD_REF
+ARG ARCH
 ARG QEMU_ARCH
+ARG OS
 
 # Basic build-time metadata as defined at http://label-schema.org
 LABEL org.label-schema.build-date=${BUILD_DATE} \
@@ -18,9 +22,9 @@ LABEL org.label-schema.build-date=${BUILD_DATE} \
     org.label-schema.vcs-ref=${BUILD_REF} \
     org.label-schema.vcs-type="Git" \
     org.label-schema.vcs-url="https://github.com/ThomDietrich/miflora-mqtt-daemon" \
-    maintainer="Raymond M Mouthaan <raymondmmouthaan@gmail.com>"
+    maintainer="ThomDietrich, Raymond Mouthaan"
 
-USER root
+# QEMU - Quick Emulation
 COPY tmp/qemu-${QEMU_ARCH}-static /usr/bin/qemu-${QEMU_ARCH}-static
 
 COPY ./requirements.txt /tmp/requirements.txt

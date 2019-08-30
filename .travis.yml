@@ -9,11 +9,13 @@ language:
 env:
     global:
         - TARGET=raymondmm/miflora-mqtt
-        - QEMU_VERSION=v3.0.0
+        - QEMU_VERSION=v4.0.0
+        - OS=alpine
     matrix:
-        - BUILD_FROM=arm32v6/python:3-alpine3.8 QEMU_ARCH=arm OS_ARCH=alpine-arm32v6 DOCKER_FILE=Dockerfile.alpine-tmpl
-        - BUILD_FROM=arm32v7/python:3-slim QEMU_ARCH=arm OS_ARCH=slim-arm32v7 DOCKER_FILE=Dockerfile.slim-tmpl
-        - BUILD_FROM=arm64v8/python:3-alpine3.8 QEMU_ARCH=aarch64 OS_ARCH=alpine-arm64v8 DOCKER_FILE=Dockerfile.alpine-tmpl
+        - DOCKER_FILE=Dockerfile.alpine ARCH=amd64   QEMU_ARCH=x86_64
+        - DOCKER_FILE=Dockerfile.alpine ARCH=arm32v6 QEMU_ARCH=arm
+        - DOCKER_FILE=Dockerfile.alpine ARCH=arm32v7 QEMU_ARCH=arm
+        - DOCKER_FILE=Dockerfile.alpine ARCH=arm64v8 QEMU_ARCH=aarch64
 
 before_install:
   - ./.docker/docker.sh prepare
@@ -22,7 +24,12 @@ install: true
 
 before_script:
     # Set BUILD_VERSION
-    - if [ ! -z "${TRAVIS_TAG}" ]; then export BUILD_VERSION=${TRAVIS_TAG}; else export BUILD_VERSION=v2.3.8; fi
+    - >
+      if [ ! -z "${TRAVIS_TAG}" ]; then
+        export BUILD_VERSION=${TRAVIS_TAG};
+      else
+        export BUILD_VERSION=v2.3.8;
+      fi
 
 script:
     # Build Docker image
@@ -31,7 +38,7 @@ script:
     # Test Docker image
     - ./.docker/docker.sh test
 
-    # Push Docker image (TODO move to function)
+    # Push Docker image, ony if TRAVIS_TAG is set
     - >
       if [ ! -z "${TRAVIS_TAG}" ]; then
         # Tag Docker image
@@ -50,18 +57,24 @@ script:
 jobs:
     include:
         - stage: manifest
+          # Only create and push manifest list to Docker Hub, when tag starts with a `v`, eg. v2.3.8
           if: tag =~ ^v
           script:
-              # Create and push Docker manifest lists (TODO move to function)
-              # Docker Login
-              - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 
-              # Create and Push Docker Manifest Lists to Docker Hub
-              - echo "Create manifest list for all docker images."
-              - ./.docker/docker.sh manifest-list
+            # Create and push Docker manifest lists
+            # The push order is displayed in reverse order on Docker Hub
 
-              # Docker Logout
-              - docker logout
+            # Docker Login
+            - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+
+            # Create and push manifest list `version`
+            - ./.docker/docker.sh manifest-list-version
+
+            # Create and push manifest list 'latest' or 'testing'
+            - ./.docker/docker.sh manifest-list-testing-or-latest
+
+            # Docker Logout
+            - docker logout
 
 # notify me when things fail
 notifications:
