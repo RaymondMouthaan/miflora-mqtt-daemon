@@ -1,12 +1,14 @@
 # Docker images for miflora-mqtt-daemon
 
+[![Build Status](https://travis-ci.org/RaymondMouthaan/miflora-mqtt-daemon.svg?branch=master)](https://travis-ci.org/RaymondMouthaan/miflora-mqtt-daemon)
+[![DockerHub Pull](https://img.shields.io/docker/pulls/raymondmm/miflora2mqtt.svg)](https://hub.docker.com/r/raymondmm/miflora2mqtt)
+[![DockerHub Stars](https://img.shields.io/docker/stars/raymondmm/miflora2mqtt.svg?maxAge=2592000)](https://hub.docker.com/r/raymondmm/miflora2mqtt)
+
 _A simple Linux python script to query arbitrary Mi Flora plant sensor devices and send the data to an **MQTT** broker._
 
 For more info: [miflora-mqtt-daemon](https://github.com/ThomDietrich/miflora-mqtt-daemon)
 
 All credits go to Thom Dietrich for creating miflora-mqtt-daemon.
-
-[](demo.gif)
 
 
 # Image Variants
